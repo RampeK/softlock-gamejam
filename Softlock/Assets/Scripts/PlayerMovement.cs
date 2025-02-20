@@ -5,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float boxMoveSpeed = 3f;
     [SerializeField] private float interactionDistance = 2f;
+    [SerializeField] private Animator animator;
     
     private Vector3 forward = new Vector3(1f, 0f, 0.5f).normalized;
     private Vector3 right = new Vector3(1f, 0f, -0.5f).normalized;
@@ -56,6 +57,17 @@ public class PlayerMovement : MonoBehaviour
         if (currentBox != null && isHoldingBox && movement != Vector3.zero)
         {
             currentBox.transform.position = transform.position + movement.normalized;
+        }
+
+        if (horizontalInput == 0 && verticalInput == 0)
+        {
+            animator.SetBool("isIdle", true);
+            animator.SetBool("isWalking", false);
+        }
+        else
+        {
+            animator.SetBool("isWalking", true);
+            animator.SetBool("isIdle", false);
         }
     }
     
