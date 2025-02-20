@@ -13,15 +13,10 @@ public class PlayerMovement : MonoBehaviour
     private GameObject currentBox;
     private bool isHoldingBox;
     private Rigidbody rb;
-    private bool isWalking = false;
     
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        // Lukitaan rotaatio, jotta hahmo ei kaadu
-        rb.freezeRotation = true;
-        // Lukitaan Y-akseli, jotta hahmo pysyy samalla korkeudella
-        rb.constraints = RigidbodyConstraints.FreezePositionY;
     }
     
     private void Update()
@@ -58,34 +53,14 @@ public class PlayerMovement : MonoBehaviour
         {
             currentBox.transform.position = transform.position + movement.normalized;
         }
-
-        // Tarkista onko nykyinen animaatio vielä kesken
-        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
         
         if (horizontalInput == 0 && verticalInput == 0)
         {
-            // Vaihda idle-animaatioon vain jos walking-animaatio on loppunut
-            if (stateInfo.IsName("Walking") && stateInfo.normalizedTime >= 1.0f)
-            {
-                animator.SetBool("isIdle", true);
-                animator.SetBool("isWalking", false);
-                isWalking = false;
-            }
+            animator.SetBool("Walk", false);
         }
         else
         {
-            // Käsittele walking-animaatio
-            if (!isWalking)
-            {
-                animator.SetBool("isWalking", true);
-                animator.SetBool("isIdle", false);
-                isWalking = true;
-            }
-            else if (stateInfo.IsName("Walking") && stateInfo.normalizedTime >= 1.0f)
-            {
-                // Käynnistä walking-animaatio uudelleen vain kun se on mennyt loppuun
-                animator.SetTrigger("WalkAgain");
-            }
+            animator.SetBool("Walk", true);
         }
     }
     
