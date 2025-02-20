@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour
     private GameObject currentBox;
     private bool isHoldingBox;
     private Rigidbody rb;
+    private bool isWalking = false;
     
     private void Start()
     {
@@ -50,8 +51,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement = (forward * verticalInput + right * horizontalInput).normalized;
         float currentSpeed = isHoldingBox ? boxMoveSpeed : moveSpeed;
         
-        // Käytetään Rigidbody.velocity liikkumiseen
-        rb.velocity = movement * currentSpeed;
+        rb.linearVelocity = movement * currentSpeed;
         
         // Liikuta laatikkoa pelaajan mukana
         if (currentBox != null && isHoldingBox && movement != Vector3.zero)
@@ -69,15 +69,22 @@ public class PlayerMovement : MonoBehaviour
             {
                 animator.SetBool("isIdle", true);
                 animator.SetBool("isWalking", false);
+                isWalking = false;
             }
         }
         else
         {
-            // Vaihda walking-animaatioon vain jos idle-animaatio on loppunut
-            if (stateInfo.IsName("Idle") && stateInfo.normalizedTime >= 1.0f)
+            // Käsittele walking-animaatio
+            if (!isWalking)
             {
                 animator.SetBool("isWalking", true);
                 animator.SetBool("isIdle", false);
+                isWalking = true;
+            }
+            else if (stateInfo.IsName("Walking") && stateInfo.normalizedTime >= 1.0f)
+            {
+                // Käynnistä walking-animaatio uudelleen vain kun se on mennyt loppuun
+                animator.SetTrigger("WalkAgain");
             }
         }
     }
