@@ -6,11 +6,21 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float boxMoveSpeed = 3f;
     [SerializeField] private float interactionDistance = 2f;
     
-    private Vector3 forward = new Vector3(1f, 0f, 1f).normalized;
-    private Vector3 right = new Vector3(1f, 0f, -1f).normalized;
+    private Vector3 forward = new Vector3(1f, 0f, 0.5f).normalized;
+    private Vector3 right = new Vector3(1f, 0f, -0.5f).normalized;
     
     private GameObject currentBox;
     private bool isHoldingBox;
+    private Rigidbody rb;
+    
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        // Lukitaan rotaatio, jotta hahmo ei kaadu
+        rb.freezeRotation = true;
+        // Lukitaan Y-akseli, jotta hahmo pysyy samalla korkeudella
+        rb.constraints = RigidbodyConstraints.FreezePositionY;
+    }
     
     private void Update()
     {
@@ -39,12 +49,13 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement = (forward * verticalInput + right * horizontalInput).normalized;
         float currentSpeed = isHoldingBox ? boxMoveSpeed : moveSpeed;
         
-        transform.position += movement * currentSpeed * Time.deltaTime;
+        // Käytetään Rigidbody.MovePosition liikkumiseen
+        rb.linearVelocity = movement * currentSpeed;
         
         // Liikuta laatikkoa pelaajan mukana
         if (currentBox != null && isHoldingBox && movement != Vector3.zero)
         {
-            currentBox.transform.position = transform.position + movement;
+            currentBox.transform.position = transform.position + movement.normalized;
         }
     }
     
