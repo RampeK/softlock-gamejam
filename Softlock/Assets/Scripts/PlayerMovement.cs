@@ -50,8 +50,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement = (forward * verticalInput + right * horizontalInput).normalized;
         float currentSpeed = isHoldingBox ? boxMoveSpeed : moveSpeed;
         
-        // Käytetään Rigidbody.MovePosition liikkumiseen
-        rb.linearVelocity = movement * currentSpeed;
+        // Käytetään Rigidbody.velocity liikkumiseen
+        rb.velocity = movement * currentSpeed;
         
         // Liikuta laatikkoa pelaajan mukana
         if (currentBox != null && isHoldingBox && movement != Vector3.zero)
@@ -59,15 +59,26 @@ public class PlayerMovement : MonoBehaviour
             currentBox.transform.position = transform.position + movement.normalized;
         }
 
+        // Tarkista onko nykyinen animaatio vielä kesken
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        
         if (horizontalInput == 0 && verticalInput == 0)
         {
-            animator.SetBool("isIdle", true);
-            animator.SetBool("isWalking", false);
+            // Vaihda idle-animaatioon vain jos walking-animaatio on loppunut
+            if (stateInfo.IsName("Walking") && stateInfo.normalizedTime >= 1.0f)
+            {
+                animator.SetBool("isIdle", true);
+                animator.SetBool("isWalking", false);
+            }
         }
         else
         {
-            animator.SetBool("isWalking", true);
-            animator.SetBool("isIdle", false);
+            // Vaihda walking-animaatioon vain jos idle-animaatio on loppunut
+            if (stateInfo.IsName("Idle") && stateInfo.normalizedTime >= 1.0f)
+            {
+                animator.SetBool("isWalking", true);
+                animator.SetBool("isIdle", false);
+            }
         }
     }
     
