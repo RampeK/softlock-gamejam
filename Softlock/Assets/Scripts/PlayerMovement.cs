@@ -22,17 +22,26 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     private bool jumped = false;
     
+    [SerializeField] private float deathY = -10f;        // Y-koordinaatti jonka alla hahmo kuolee
+    [SerializeField] private float respawnHeight = 2f;   // Kuinka korkealta hahmo spawnataan
+    private Vector3 startPosition;                        // Aloituspisteen tallennus
+    
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         rb.useGravity = false; // Käytämme omaa painovoimaa
+        
+        // Tallenna aloituspiste
+        startPosition = transform.position;
     }
     
     private void Update()
     {
         CheckGrounded();
         HandleJump();
+        CheckRespawn();  // Lisätään tarkistus
+        HandleMovement();
         
         // Tartu laatikkoon tai päästä irti
         //if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0))
@@ -47,8 +56,6 @@ public class PlayerMovement : MonoBehaviour
         //{
         //    ReleaseBox();
         //}
-        
-        HandleMovement();
     }
     
     private void CheckGrounded()
@@ -160,4 +167,30 @@ public class PlayerMovement : MonoBehaviour
     //    isHoldingBox = false;
     //    currentBox = null;
     //}
+
+    // Tarkista pitääkö hahmo palauttaa alkuun
+    private void CheckRespawn()
+    {
+        if (transform.position.y < deathY)
+        {
+            Respawn();
+        }
+    }
+    
+    // Palauta hahmo alkupisteeseen
+    private void Respawn()
+    {
+        // Nollaa nopeudet
+        rb.linearVelocity = Vector3.zero;
+        velocity = Vector3.zero;
+        
+        // Aseta hahmo alkupisteeseen hieman ilmaan
+        Vector3 respawnPosition = startPosition + Vector3.up * respawnHeight;
+        transform.position = respawnPosition;
+        
+        // Nollaa muut tarvittavat tilat
+        jumped = false;
+        currentBox = null;  // Nollataan viittaus laatikkoon
+        isHoldingBox = false;  // Vapautetaan laatikko
+    }
 } 
