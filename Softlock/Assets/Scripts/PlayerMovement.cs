@@ -189,8 +189,6 @@ public class PlayerMovement : MonoBehaviour
         transform.position = respawnPosition;
         
         // Nollaa muut tarvittavat tilat
-        jumped = false;
-        currentBox = null;  // Nollataan viittaus laatikkoon
-        isHoldingBox = false;  // Vapautetaan laatikko
+        jumped = false;       
     }
 } 
