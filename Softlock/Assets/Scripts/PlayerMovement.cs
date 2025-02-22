@@ -11,8 +11,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;    // Maakerros tarkistusta varten
     [SerializeField] private Transform groundCheckPosition; // Transform josta tehdään ground check
     
-    private Vector3 forward = new Vector3(1f, 0f, 0.5f).normalized;
-    private Vector3 right = new Vector3(1f, 0f, -0.5f).normalized;
+    // Isometrisen näkymän liikkumisvektorit
+    private Vector3 forward = new Vector3(1f, 0f, 0.5f).normalized;  // Määrittää "ylös" suunnan isometrisessä näkymässä
+    private Vector3 right = new Vector3(1f, 0f, -0.5f).normalized;   // Määrittää "oikea" suunnan isometrisessä näkymässä
     
     private GameObject currentBox;
     private bool isHoldingBox;
@@ -100,16 +101,26 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-        float verticalInput = Input.GetAxisRaw("Vertical");
+        // Lue pelaajan syötteet (-1 to 1)
+        float horizontalInput = Input.GetAxisRaw("Horizontal");  // A/D tai nuolinäppäimet
+        float verticalInput = Input.GetAxisRaw("Vertical");      // W/S tai nuolinäppäimet
         
+        // Laske liikkumissuunta isometrisessä näkymässä yhdistämällä forward ja right vektorit
         Vector3 movement = (forward * verticalInput + right * horizontalInput).normalized;
         
-        // Yhdistä vaaka- ja pystyliike
+        // Laske lopullinen nopeus ja aseta se Rigidbodylle
         Vector3 moveVelocity = movement * moveSpeed;
-        rb.linearVelocity = new Vector3(moveVelocity.x, velocity.y, moveVelocity.z);
+        rb.linearVelocity = new Vector3(moveVelocity.x, velocity.y, moveVelocity.z);  // Säilytä y-nopeus hyppyä varten
         
-        // Liikuta laatikkoa pelaajan mukana
+        // Käännä hahmo liikkumissuuntaan, 90 astetta käännettynä isometrisessä näkymässä
+        if (movement != Vector3.zero)
+        {
+            // Käännetään movement-vektori 90 astetta, jotta hahmo katsoo oikeaan suuntaan
+            Vector3 lookDirection = new Vector3(-movement.z, 0, movement.x);
+            transform.rotation = Quaternion.LookRotation(lookDirection);
+        }
+        
+        // Liikuta laatikkoa pelaajan mukana jos sellainen on tartuttu
         if (currentBox != null && isHoldingBox && movement != Vector3.zero)
         {
             currentBox.transform.position = transform.position + movement.normalized;
@@ -118,13 +129,14 @@ public class PlayerMovement : MonoBehaviour
         // Päivitä kävelyanimaatio vain jos hahmo on maassa
         if (isGrounded)
         {
+            // Vaihda idle/walk animaatiota liikkumistilan mukaan
             if (horizontalInput == 0 && verticalInput == 0)
             {
-                animator.SetBool("Walk", false);
+                animator.SetBool("Walk", false);  // Paikallaan -> idle animaatio
             }
             else
             {
-                animator.SetBool("Walk", true);
+                animator.SetBool("Walk", true);   // Liikkeessä -> walk animaatio
             }
         }
     }
