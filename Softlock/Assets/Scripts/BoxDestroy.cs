@@ -4,10 +4,16 @@ public class BoxDestroy : MonoBehaviour
 {
     [SerializeField] private float destroyY = -10f;    // Y-koordinaatti jonka alla laatikko tuhoutuu
     [SerializeField] private float softLockTime = 1f;  // Aika jonka laatikon pitää olla nurkassa
+    private GameManager gameManager;
     
     private float softLockTimer = 0f;
     private int wallContactCount = 0;  // Montaa seinää laatikko koskee
-    
+
+    private void Start()
+    {
+        gameManager = FindFirstObjectByType<GameManager>();
+    }
+
     private void Update()
     {
         CheckDestroy();
@@ -42,7 +48,7 @@ public class BoxDestroy : MonoBehaviour
             if (softLockTimer >= softLockTime)
             {
                 Debug.Log("Box is softlocked in corner!");
-                Destroy(gameObject); //TODO: Korvaa end screenillä
+                gameManager.InitiateEndScreen(true);
             }
         }
         else
@@ -55,7 +61,8 @@ public class BoxDestroy : MonoBehaviour
     {
         if (transform.position.y < destroyY)
         {
-            //TODO: Tähän voidaan myöhemmin lisätä end screen kutsu           
+            //TODO: Tähän voidaan myöhemmin lisätä end screen kutsu
+            gameManager.InitiateEndScreen(true);
             Destroy(gameObject);
         }
     }

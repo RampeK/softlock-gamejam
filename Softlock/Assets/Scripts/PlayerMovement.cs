@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
     public bool isGrounded;
     private Vector3 velocity;
     private bool jumped = false;
+    public bool isEnded = false;
     
     [SerializeField] private float deathY = -10f;        // Y-koordinaatti jonka alla hahmo kuolee
     [SerializeField] private float respawnHeight = 2f;   // Kuinka korkealta hahmo spawnataan
@@ -38,10 +39,13 @@ public class PlayerMovement : MonoBehaviour
     
     private void Update()
     {
-        CheckGrounded();
-        HandleJump();
-        CheckRespawn();  // Lisätään tarkistus
-        HandleMovement();
+        if (!isEnded)
+        {
+            CheckGrounded();
+            HandleJump();
+            CheckRespawn();  // Lisätään tarkistus
+            HandleMovement();
+        }
         
         // Tartu laatikkoon tai päästä irti
         //if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0))
@@ -95,8 +99,6 @@ public class PlayerMovement : MonoBehaviour
                 velocity.y = 0;
             }
         }
-
-        Debug.Log("Y Velocity = " + velocity.y);
     }
     
     private IEnumerator SetJumpedToFalse()
