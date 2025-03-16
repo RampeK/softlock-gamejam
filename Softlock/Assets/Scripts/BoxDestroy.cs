@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class BoxDestroy : MonoBehaviour
@@ -5,13 +6,16 @@ public class BoxDestroy : MonoBehaviour
     [SerializeField] private float destroyY = -10f;    // Y-koordinaatti jonka alla laatikko tuhoutuu
     [SerializeField] private float softLockTime = 1f;  // Aika jonka laatikon pitää olla nurkassa
     private GameManager gameManager;
+    private AudioManager audioManager;
     
     private float softLockTimer = 0f;
     private int wallContactCount = 0;  // Montaa seinää laatikko koskee
+    private bool check = false;
 
     private void Start()
     {
         gameManager = FindFirstObjectByType<GameManager>();
+        audioManager = FindFirstObjectByType<AudioManager>();
     }
 
     private void Update()
@@ -44,6 +48,13 @@ public class BoxDestroy : MonoBehaviour
         if (isInCorner)
         {
             softLockTimer += Time.deltaTime;
+
+            if (!check)
+            {
+                audioManager.StopSinging();
+                audioManager.PlayReaction(true);
+                check = true;
+            }
             
             if (softLockTimer >= softLockTime)
             {
@@ -61,9 +72,23 @@ public class BoxDestroy : MonoBehaviour
     {
         if (transform.position.y < destroyY)
         {
-            //TODO: Tähän voidaan myöhemmin lisätä end screen kutsu
-            gameManager.InitiateEndScreen(true);
-            Destroy(gameObject);
+            if (!check)
+            {
+                audioManager.StopSinging();
+                audioManager.PlayReaction(true);
+                check = true;
+
+                StartCoroutine(DestroyBox());
+            }
         }
+    }
+
+    private IEnumerator DestroyBox()
+    {
+        yield return new WaitForSeconds(1f);
+
+        Debug.Log("Box is destroyed!");
+        gameManager.InitiateEndScreen(true);
+        Destroy(gameObject);
     }
 } 

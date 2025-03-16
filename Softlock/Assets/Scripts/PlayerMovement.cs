@@ -39,14 +39,11 @@ public class PlayerMovement : MonoBehaviour
     
     private void Update()
     {
-        if (!isEnded)
-        {
-            CheckGrounded();
-            HandleJump();
-            CheckRespawn();  // Lisätään tarkistus
-            HandleMovement();
-        }
-        
+        CheckGrounded();
+        HandleJump();
+        CheckRespawn();  // Lisätään tarkistus
+        HandleMovement();
+
         // Tartu laatikkoon tai päästä irti
         //if (Input.GetKeyDown(KeyCode.E) || Input.GetKeyDown(KeyCode.F) || Input.GetMouseButtonDown(0))
         //{
@@ -55,7 +52,7 @@ public class PlayerMovement : MonoBehaviour
         //        TryGrabBox();
         //    }
         //}
-        
+
         //if (Input.GetKeyUp(KeyCode.E) || Input.GetKeyUp(KeyCode.F) || Input.GetMouseButtonUp(0))
         //{
         //    ReleaseBox();
@@ -74,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
     
     private void HandleJump()
     {
-        if (isGrounded && Input.GetKeyDown(KeyCode.Space))
+        if (!isEnded && isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
             animator.SetTrigger("Jump");
@@ -110,12 +107,22 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
+        Vector3 movement;
+
         // Lue pelaajan syötteet (-1 to 1)
         float horizontalInput = Input.GetAxisRaw("Horizontal");  // A/D tai nuolinäppäimet
         float verticalInput = Input.GetAxisRaw("Vertical");      // W/S tai nuolinäppäimet
         
         // Laske liikkumissuunta isometrisessä näkymässä yhdistämällä forward ja right vektorit
-        Vector3 movement = (forward * verticalInput + right * horizontalInput).normalized;
+
+        if (!isEnded)
+        {
+            movement = (forward * verticalInput + right * horizontalInput).normalized;
+        }
+        else
+        {
+            movement = (forward * 0 + right * 0).normalized;
+        }
         
         // Laske lopullinen nopeus ja aseta se Rigidbodylle
         Vector3 moveVelocity = movement * moveSpeed;
@@ -136,7 +143,7 @@ public class PlayerMovement : MonoBehaviour
         }
         
         // Päivitä kävelyanimaatio vain jos hahmo on maassa
-        if (isGrounded)
+        if (isGrounded && !isEnded)
         {
             // Vaihda idle/walk animaatiota liikkumistilan mukaan
             if (horizontalInput == 0 && verticalInput == 0)
@@ -147,6 +154,11 @@ public class PlayerMovement : MonoBehaviour
             {
                 animator.SetBool("Walk", true);   // Liikkeessä -> walk animaatio
             }
+        }
+
+        if (isEnded)
+        {
+            animator.SetBool("Walk", false);
         }
     }
     

@@ -8,21 +8,30 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     private PlayerMovement playerMovement;
+    private AudioManager audioManager;
 
     public Image background;
     public TMP_Text title;
     public TMP_Text subtitle;
     public TMP_Text buttonText;
     public Button endButton;
+    public Button menuButton;
 
     private bool ended = false;
 
     void Start()
     {
+        audioManager = FindFirstObjectByType<AudioManager>();
+
         background.gameObject.SetActive(false);
         title.gameObject.SetActive(false);
         subtitle.gameObject.SetActive(false);
         endButton.gameObject.SetActive(false);
+
+        audioManager.StopSinging();
+        audioManager.PlaySinging(false);
+
+        menuButton.onClick.AddListener(() => EndLevel(true));
     }
 
     public void InitiateEndScreen(bool softlocked)
@@ -44,7 +53,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator ShowEndScreen(bool softlocked)
     {
-        if (softlocked) { yield return new WaitForSeconds(0.6f); }
+        if (softlocked) { yield return new WaitForSeconds(1.5f); }
+        menuButton.gameObject.SetActive(false);
         background.gameObject.SetActive(true);
 
         background.color = new Color(background.color.r, background.color.g, background.color.b, 0);
@@ -54,6 +64,8 @@ public class GameManager : MonoBehaviour
             background.color = new Color(background.color.r, background.color.g, background.color.b, background.color.a + (Time.deltaTime / 1));
             yield return null;
         }
+
+        audioManager.PlayJingle(softlocked);
 
         title.gameObject.SetActive(true);
         if (softlocked) { title.text = "Oops! Something went wrong!"; }
@@ -70,6 +82,8 @@ public class GameManager : MonoBehaviour
 
     private void EndLevel(bool softlocked)
     {
+        audioManager.PlayButtonSound();
+
         if (softlocked)
         {
             SceneManager.LoadScene(sceneName: "MainMenu");
